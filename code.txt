@@ -1,0 +1,54 @@
+const fs = require('fs');
+const path = require('path');
+
+
+function filewalker(dir, done) {
+    let results = [];
+
+    fs.readdir(dir, function(err, list) {
+        if (err) {
+        	return done(err);
+        }
+
+        var pending = list.length;
+
+        if (!pending) {
+        	return done(null, results);
+
+        }
+
+        list.forEach(function(file){
+            file = path.resolve(dir, file);
+
+
+            fs.stat(file, function(err, stat){
+                // If directory, execute a recursive call
+                if (stat && stat.isDirectory()) {
+                    relativePath = path.relative('/University/3k1s/PSKP/git_tutorial/work/cwp-01', path.resolve(dir, file));
+                    results.push(relativePath);
+
+                    filewalker(file, function(err, res){
+                        results = results.concat(res);
+                        if (!--pending) {
+                        	done(null, results);
+                        }
+                    });
+                } else {
+                	relativePath = path.relative('/University/3k1s/PSKP/git_tutorial/work/cwp-01', path.resolve(dir, file));
+                    results.push(relativePath);
+
+                    if (!--pending){
+                    	 done(null, results);
+                    }
+                }
+            });
+        });
+    });
+};
+
+filewalker("../cwp-01", function(err, data){
+    if(err){
+        throw err;
+    }
+    console.log(data);
+});
